@@ -48,7 +48,14 @@ def analyze_image(file_path):
             results["deepvision_score"] = get_deepvision_score(pixels)
             
             # Advanced Tools Integration
-            from core.tools import run_strings, run_exif, run_binwalk, run_steghide_check, run_zsteg, generate_bit_planes
+            from core.tools import (
+                run_strings, run_exif, run_binwalk, run_steghide_check, 
+                run_zsteg, run_outguess, run_f5, run_stegcracker, 
+                run_stegsolve, run_pngcheck, run_jpegdump, run_stegdetect, 
+                run_stegoveritas, run_foremost, run_bulk_extractor, 
+                run_exiftool, run_aperisolve_cli, run_lsb_tools, run_lsb_extract, 
+                run_stegano, run_openstego, run_camo, generate_bit_planes
+            )
             
             # Generate bit planes
             bit_planes_dir = "static/bitplanes"
@@ -60,6 +67,23 @@ def analyze_image(file_path):
                 "binwalk": run_binwalk(file_path),
                 "steghide": run_steghide_check(file_path),
                 "zsteg": run_zsteg(file_path),
+                "outguess": run_outguess(file_path),
+                "f5": run_f5(file_path),
+                "stegcracker": run_stegcracker(file_path),
+                "stegsolve": run_stegsolve(file_path),
+                "pngcheck": run_pngcheck(file_path),
+                "jpegdump": run_jpegdump(file_path),
+                "stegdetect": run_stegdetect(file_path),
+                "stegoveritas": run_stegoveritas(file_path),
+                "foremost": run_foremost(file_path),
+                "bulk_extractor": run_bulk_extractor(file_path),
+                "exiftool": run_exiftool(file_path),
+                "aperisolve": run_aperisolve_cli(file_path),
+                "lsb_tools": run_lsb_tools(file_path),
+                "lsb_extract": run_lsb_extract(file_path),
+                "stegano": run_stegano(file_path),
+                "openstego": run_openstego(file_path),
+                "camo": run_camo(file_path),
                 "bit_planes": bit_planes_result
             }
             
@@ -82,15 +106,25 @@ def analyze_image(file_path):
                 suspicion_points += 40
                 reasons.append("Binwalk detected embedded files or signatures.")
                 
-            # Check Strings (simple heuristic: too many strings or specific keywords)
-            if results["tool_reports"]["strings"]["status"] == "Success" and results["tool_reports"]["strings"]["count"] > 1000:
-                suspicion_points += 10
-                reasons.append("High density of printable strings found.")
-
             # Check Zsteg
             if results["tool_reports"]["zsteg"]["status"] == "Success" and len(results["tool_reports"]["zsteg"]["output"]) > 0:
-                 suspicion_points += 50
+                 suspicion_points += 40
                  reasons.append("Zsteg found hidden data in PNG/BMP structure.")
+
+            # Check PNGCheck
+            if results["tool_reports"]["pngcheck"]["status"] == "Warning":
+                 suspicion_points += 15
+                 reasons.append("PNGCheck found structural inconsistencies in the image.")
+
+            # Check Steghide/Outguess (if they output anything beyond basic info)
+            if results["tool_reports"]["steghide"]["status"] == "Success" and any("capacity" in line.lower() for line in results["tool_reports"]["steghide"]["output"]):
+                 # This is just info, but if it found data it would be higher
+                 pass
+
+            # Check Stegano (Python)
+            if results["tool_reports"]["stegano"]["status"] == "Success":
+                 suspicion_points += 50
+                 reasons.append("Python Stegano successfully revealed hidden text.")
 
             final_verdict = "Safe"
             if suspicion_points > 30:

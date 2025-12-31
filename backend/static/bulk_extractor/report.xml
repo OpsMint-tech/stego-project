@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dfxml xmloutputversion='1.0' xmlns:debug='http://afflib.org/bulk_extractor/debug'>
+  <metadata 
+  xmlns='http://afflib.org/bulk_extractor/' 
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' 
+  xmlns:dc='http://purl.org/dc/elements/1.1/'>
+    <dc:type>Feature Extraction</dc:type>
+  </metadata>
+  <creator version='1.0'>
+    <program>BULK_EXTRACTOR</program>
+    <version>2.1.1</version>
+    <build_environment>
+      <compiler>4.2.1 (Apple LLVM 17.0.0 (clang-1700.3.19.1))</compiler>
+      <CPPFLAGS>-DUTC_OFFSET=+0000 </CPPFLAGS>
+      <CFLAGS>-O2 -O3 -fPIC -g </CFLAGS>
+      <CXXFLAGS>-MD -O2 -O3 -Wall -Wcast-align -Wdisabled-optimization -Weffc++ -Wfloat-equal -Wmissing-noreturn -Wmultichar -Woverloaded-virtual -Wpointer-arith -Wredundant-decls -Wshadow -Wsign-promo -Wwrite-strings -fPIC -g </CXXFLAGS>
+      <LDFLAGS>-Wl,-dead_strip_dylibs</LDFLAGS>
+      <LIBS>-lstdc++ -lexpat -lz -ldl -ltermcap -lsqlite3 -lexpat </LIBS>
+      <compilation_date>2024-04-27T21:26:13</compilation_date>
+      <library name="sqlite" version="3.51.0" source_id="2025-06-12 13:14:41 f0ca7bba1c5e232e5d279fad6338121ab55af0c8c68c84cdfb18ba5114dcaapl"/>
+    </build_environment>
+    <execution_environment>
+      <os_sysname>Darwin</os_sysname>
+      <os_release>25.1.0</os_release>
+      <os_version>Darwin Kernel Version 25.1.0: Mon Oct 20 19:34:03 PDT 2025; root:xnu-12377.41.6~2/RELEASE_ARM64_T8112</os_version>
+      <host>Vigneshs-MacBook-Air.local</host>
+      <arch>arm64</arch>
+      <command_line>bulk_extractor -o static/bulk_extractor /var/folders/q2/5gv7d1ts3td_x932lsrkxpcc0000gn/T/tmpyfetq529.png</command_line>
+      <uid>501</uid>
+      <username>vigneshkumar</username>
+      <start_time>2025-12-31T05:58:02Z</start_time>
+    </execution_environment>
+  </creator>
+  <configuration>
+    <threads>8</threads>
+    <pagesize>16777216</pagesize>
+    <marginsize>4194304</marginsize>
+    <scanners>
+      <scanner>aes</scanner>
+      <scanner>base64</scanner>
+      <scanner>elf</scanner>
+      <scanner>evtx</scanner>
+      <scanner>exif</scanner>
+      <scanner>facebook</scanner>
+      <scanner>find</scanner>
+      <scanner>gzip</scanner>
+      <scanner>httplogs</scanner>
+      <scanner>json</scanner>
+      <scanner>kml_carved</scanner>
+      <scanner>msxml</scanner>
+      <scanner>net</scanner>
+      <scanner>ntfsindx</scanner>
+      <scanner>ntfslogfile</scanner>
+      <scanner>ntfsmft</scanner>
+      <scanner>ntfsusn</scanner>
+      <scanner>pdf</scanner>
+      <scanner>sqlite</scanner>
+      <scanner>utmp</scanner>
+      <scanner>vcard_carved</scanner>
+      <scanner>windirs</scanner>
+      <scanner>winlnk</scanner>
+      <scanner>winpe</scanner>
+      <scanner>winprefetch</scanner>
+      <scanner>zip</scanner>
+      <scanner>accts</scanner>
+      <scanner>email</scanner>
+      <scanner>gps</scanner>
+    </scanners>
+  </configuration>
+  <provided_filename>/var/folders/q2/5gv7d1ts3td_x932lsrkxpcc0000gn/T/tmpyfetq529.png</provided_filename>
+  <timestamp name='phase1 start' delta='0.001209' total='0.001209'/>
+  <debug:work_start pos0='0' restarted='1' />
+  <debug:work_stop pos0='0' restarted='1' />
+  <runtime xmlns:debug="http://www.github.com/simsong/bulk_extractor/issues">
+  </runtime>
+  <source>
+    <image_filename>/var/folders/q2/5gv7d1ts3td_x932lsrkxpcc0000gn/T/tmpyfetq529.png</image_filename>
+    <image_size>458</image_size>
+    <hashdigest type='SHA1'>da39a3ee5e6b4b0d3255bfef95601890afd80709</hashdigest>
+  </source>
+  <timestamp name='phase1 end' delta='0.103622' total='0.104831'/>
+  <timestamp name='phase2 start' delta='0.901583' total='1.006415'/>
+  <timestamp name='phase2 end' delta='0.005050' total='1.011469'/>
+  <report>
+    <total_bytes>0</total_bytes>
+    <elapsed_seconds>1.011539</elapsed_seconds>
+    <max_depth_seen>0</max_depth_seen>
+    <dup_bytes_encountered>0</dup_bytes_encountered>
+    <sbufs_created>0</sbufs_created>
+    <sbufs_unaccounted>0</sbufs_unaccounted>
+    <producer_timer_ns>0</producer_timer_ns>
+    <consumer_wait_ns>9471750</consumer_wait_ns>
+    <consumer_wait_ns_per_worker>0</consumer_wait_ns_per_worker>
+    <scanner_stats>
+    </scanner_stats>
+    <feature_files>
+      <feature_file><name>aes_keys</name><count>0</count></feature_file>
+      <feature_file><name>alerts</name><count>0</count></feature_file>
+      <feature_file><name>ccn</name><count>0</count></feature_file>
+      <feature_file><name>ccn_track2</name><count>0</count></feature_file>
+      <feature_file><name>domain</name><count>0</count></feature_file>
+      <feature_file><name>elf</name><count>0</count></feature_file>
+      <feature_file><name>email</name><count>0</count></feature_file>
+      <feature_file><name>ether</name><count>0</count></feature_file>
+      <feature_file><name>evtx_carved</name><count>0</count></feature_file>
+      <feature_file><name>exif</name><count>0</count></feature_file>
+      <feature_file><name>facebook</name><count>0</count></feature_file>
+      <feature_file><name>find</name><count>0</count></feature_file>
+      <feature_file><name>gps</name><count>0</count></feature_file>
+      <feature_file><name>httplogs</name><count>0</count></feature_file>
+      <feature_file><name>ip</name><count>0</count></feature_file>
+      <feature_file><name>jpeg</name><count>0</count></feature_file>
+      <feature_file><name>json</name><count>0</count></feature_file>
+      <feature_file><name>kml_carved</name><count>0</count></feature_file>
+      <feature_file><name>ntfsindx_carved</name><count>0</count></feature_file>
+      <feature_file><name>ntfslogfile_carved</name><count>0</count></feature_file>
+      <feature_file><name>ntfsmft_carved</name><count>0</count></feature_file>
+      <feature_file><name>ntfsusn_carved</name><count>0</count></feature_file>
+      <feature_file><name>pii</name><count>0</count></feature_file>
+      <feature_file><name>rfc822</name><count>0</count></feature_file>
+      <feature_file><name>sin</name><count>0</count></feature_file>
+      <feature_file><name>sqlite_carved</name><count>0</count></feature_file>
+      <feature_file><name>tcp</name><count>0</count></feature_file>
+      <feature_file><name>telephone</name><count>0</count></feature_file>
+      <feature_file><name>url</name><count>0</count></feature_file>
+      <feature_file><name>utmp_carved</name><count>0</count></feature_file>
+      <feature_file><name>vcard</name><count>0</count></feature_file>
+      <feature_file><name>windirs</name><count>0</count></feature_file>
+      <feature_file><name>winlnk</name><count>0</count></feature_file>
+      <feature_file><name>winpe</name><count>0</count></feature_file>
+      <feature_file><name>winpe_carved</name><count>0</count></feature_file>
+      <feature_file><name>winprefetch</name><count>0</count></feature_file>
+      <feature_file><name>zip</name><count>0</count></feature_file>
+    </feature_files>
+  </report>
+  <rusage>
+    <utime>0.003469</utime>
+    <stime>0.009656</stime>
+    <maxrss>3604480</maxrss>
+    <minflt>391</minflt>
+    <majflt>58</majflt>
+    <nswap>0</nswap>
+    <inblock>0</inblock>
+    <oublock>0</oublock>
+    <clocktime>1.012379</clocktime>
+  </rusage>
+</dfxml>

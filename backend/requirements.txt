@@ -3,4 +3,7 @@ uvicorn
 python-multipart
 pillow
 numpy
-scipy
+piexif
+stegano
+framer-motion-py
+imageio

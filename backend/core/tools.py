@@ -6,138 +6,147 @@ import re
 import numpy as np
 from PIL import Image
 
+def run_command(command, input_data=None):
+    """
+    Helper to run CLI commands and return status/output.
+    """
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            input=input_data,
+            timeout=30 # Prevent long hangs
+        )
+        return {
+            "status": "Success" if result.returncode == 0 else "Warning",
+            "output": (result.stdout + "\n" + result.stderr).strip().splitlines()
+        }
+    except FileNotFoundError:
+        return {"status": "Not Installed", "error": f"{command[0]} command not found"}
+    except subprocess.TimeoutExpired:
+        return {"status": "Timeout", "error": "Command timed out after 30 seconds"}
+    except Exception as e:
+        return {"status": "Error", "error": str(e)}
+
 def run_strings(file_path, min_length=4):
     """
     Extracts printable strings from the file.
     """
-    try:
-        result = subprocess.run(
-            ["strings", "-n", str(min_length), file_path],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        # Limit output to first 1000 characters or 50 lines to avoid massive payloads
-        lines = result.stdout.splitlines()
+    cmd_res = run_command(["strings", "-n", str(min_length), file_path])
+    if cmd_res["status"] == "Success":
+        lines = cmd_res["output"]
         return {
             "status": "Success",
             "count": len(lines),
             "preview": lines[:50]
         }
-    except FileNotFoundError:
-        return {"status": "Not Installed", "error": "strings command not found"}
-    except Exception as e:
-        return {"status": "Error", "error": str(e)}
+    return cmd_res
 
 def run_exif(file_path):
     """
-    Extracts EXIF metadata using piexif.
+    Extracts EXIF metadata using piexif and exiftool if available.
     """
+    results = {"piexif": {}, "exiftool": {}}
+    
+    # Piexif (Python library)
     try:
         exif_dict = piexif.load(file_path)
-        # Convert bytes to string for JSON serialization
         readable_exif = {}
         for ifd in exif_dict:
-            if ifd == "thumbnail":
-                continue
+            if ifd == "thumbnail": continue
             readable_exif[ifd] = {}
             for tag in exif_dict[ifd]:
                 try:
                     tag_name = piexif.TAGS[ifd][tag]["name"]
                     value = exif_dict[ifd][tag]
                     if isinstance(value, bytes):
-                        try:
-                            value = value.decode('utf-8')
-                        except:
-                            value = f"<binary data: {len(value)} bytes>"
+                        try: value = value.decode('utf-8')
+                        except: value = f"<binary data: {len(value)} bytes>"
                     readable_exif[ifd][tag_name] = value
-                except:
-                    pass
-        return {"status": "Success", "data": readable_exif}
+                except: pass
+        results["piexif"] = {"status": "Success", "data": readable_exif}
     except Exception as e:
-        return {"status": "Error", "error": str(e)}
+        results["piexif"] = {"status": "Error", "error": str(e)}
+        
+    # Exiftool (CLI)
+    results["exiftool"] = run_command(["exiftool", file_path])
+    
+    return results
 
 def run_binwalk(file_path):
-    """
-    Runs binwalk to check for embedded files.
-    """
-    try:
-        # Try running binwalk command line
-        result = subprocess.run(
-            ["binwalk", file_path],
-            capture_output=True,
-            text=True
-        )
-        if result.returncode == 0:
-            return {
-                "status": "Success",
-                "output": result.stdout.splitlines()
-            }
-        else:
-             return {"status": "Error", "error": result.stderr}
-    except FileNotFoundError:
-        return {"status": "Not Installed", "error": "binwalk command not found"}
-    except Exception as e:
-        return {"status": "Error", "error": str(e)}
+    return run_command(["binwalk", file_path])
 
 def run_steghide_check(file_path):
-    """
-    Checks if steghide can extract data.
-    """
-    try:
-        # steghide info file_path
-        result = subprocess.run(
-            ["steghide", "info", file_path],
-            capture_output=True,
-            text=True,
-            input="n" # Answer no if asked for passphrase interactively
-        )
-        return {
-            "status": "Executed",
-            "output": result.stdout if result.stdout else result.stderr
-        }
-    except FileNotFoundError:
-        return {"status": "Not Installed", "error": "steghide command not found"}
-    except Exception as e:
-        return {"status": "Error", "error": str(e)}
+    # Try basic steghide if available
+    return run_command(["steghide", "info", file_path], input_data="n")
 
 def run_zsteg(file_path):
-    """
-    Runs zsteg on the file (PNG/BMP only).
-    """
-    try:
-        # Check if zsteg is installed
-        subprocess.run(["zsteg", "--version"], capture_output=True, check=True)
-        
-        result = subprocess.run(
-            ["zsteg", "-a", file_path], # -a for all checks
-            capture_output=True,
-            text=True
-        )
-        
-        # Parse output slightly to make it JSON friendly
-        lines = result.stdout.splitlines()
-        parsed_lines = []
-        for line in lines:
-            if line.strip():
-                parsed_lines.append(line.strip())
-                
-        return {
-            "status": "Success",
-            "output": parsed_lines
-        }
-    except FileNotFoundError:
-        return {"status": "Not Installed", "error": "zsteg command not found (requires Ruby gem install zsteg)"}
-    except subprocess.CalledProcessError:
-        return {"status": "Not Installed", "error": "zsteg command failed or not found"}
-    except Exception as e:
-        return {"status": "Error", "error": str(e)}
+    # Runs zsteg -a
+    return run_command(["zsteg", "-a", file_path])
+
+def run_outguess(file_path):
+    # Note: Brewster outguess might be missing CLI, but checking path
+    return run_command(["outguess", "-k", "pass", "-r", file_path, "/dev/null"])
+
+def run_f5(file_path):
+    # F5 is usually a Java app, checking if a wrapper script exists
+    return run_command(["f5-steganography", "extract", "-p", "", "-e", "/dev/null", file_path])
+
+def run_stegcracker(file_path):
+    # Requires a wordlist, we just run to check existence/version
+    return run_command(["stegcracker", "--help"])
+
+def run_stegsolve(file_path):
+    # Checking if stegsolve jar exists in any common location or just checking java
+    return run_command(["java", "-jar", "stegsolve.jar", "check", file_path])
+
+def run_pngcheck(file_path):
+    return run_command(["pngcheck", "-v", file_path])
+
+def run_jpegdump(file_path):
+    return run_command(["jpegdump", file_path])
+
+def run_stegdetect(file_path):
+    return run_command(["stegdetect", file_path])
+
+def run_stegoveritas(file_path):
+    # stegoveritas creates a directory, we just run it to get stdout
+    return run_command(["stegoveritas", "-v", file_path])
+
+def run_foremost(file_path, output_dir="static/foremost"):
+    os.makedirs(output_dir, exist_ok=True)
+    return run_command(["foremost", "-v", "-o", output_dir, file_path])
+
+def run_bulk_extractor(file_path, output_dir="static/bulk_extractor"):
+    os.makedirs(output_dir, exist_ok=True)
+    return run_command(["bulk_extractor", "-o", output_dir, file_path])
+
+def run_exiftool(file_path):
+    return run_command(["exiftool", "-G", file_path])
+
+def run_aperisolve_cli(file_path):
+    return run_command(["aperisolve", file_path])
+
+def run_lsb_tools(file_path):
+    return run_command(["lsb-tools", "analyze", file_path])
+
+def run_lsb_extract(file_path):
+    return run_command(["lsbextract", "-i", file_path])
+
+def run_stegano(file_path):
+    # Python stegano CLI is named stegano-lsb
+    return run_command(["stegano-lsb", "reveal", "-i", file_path])
+
+def run_openstego(file_path):
+    return run_command(["openstego", "info", file_path])
+
+def run_camo(file_path):
+    return run_command(["camo", "-v", file_path])
 
 def generate_bit_planes(file_path, output_dir):
     """
     Generates bit plane images for the uploaded file.
-    Saves them to output_dir.
-    Returns a list of relative paths to the generated images.
     """
     try:
         img = Image.open(file_path)
@@ -145,8 +154,6 @@ def generate_bit_planes(file_path, output_dir):
             img = img.convert('RGB')
             
         pixels = np.array(img)
-        
-        # Ensure output directory exists
         os.makedirs(output_dir, exist_ok=True)
         base_name = os.path.splitext(os.path.basename(file_path))[0]
         
@@ -154,35 +161,21 @@ def generate_bit_planes(file_path, output_dir):
         generated_files = []
         
         for i, channel in enumerate(channels):
-            # Bit 0 (LSB)
-            bit = 0
-            plane = (pixels[:, :, i] >> bit) & 1
-            # Scale to 0-255
-            plane_img = (plane * 255).astype(np.uint8)
-            
-            out_filename = f"{base_name}_{channel}_Bit{bit}.png"
-            out_path = os.path.join(output_dir, out_filename)
-            Image.fromarray(plane_img).save(out_path)
-            
-            generated_files.append({
-                "name": f"{channel} Channel - Bit {bit} (LSB)",
-                "path": f"http://localhost:8000/static/bitplanes/{out_filename}"
-            })
-            
-            # Bit 1
-            bit = 1
-            plane = (pixels[:, :, i] >> bit) & 1
-            plane_img = (plane * 255).astype(np.uint8)
-            out_filename = f"{base_name}_{channel}_Bit{bit}.png"
-            out_path = os.path.join(output_dir, out_filename)
-            Image.fromarray(plane_img).save(out_path)
-            
-            generated_files.append({
-                "name": f"{channel} Channel - Bit {bit}",
-                "path": f"http://localhost:8000/static/bitplanes/{out_filename}"
-            })
+            for bit in [0, 1]: # Just LSB and next bit for brevity
+                plane = (pixels[:, :, i] >> bit) & 1
+                plane_img = (plane * 255).astype(np.uint8)
+                
+                out_filename = f"{base_name}_{channel}_Bit{bit}.png"
+                out_path = os.path.join(output_dir, out_filename)
+                Image.fromarray(plane_img).save(out_path)
+                
+                generated_files.append({
+                    "name": f"{channel} Channel - Bit {bit} ({'LSB' if bit==0 else 'Bit 1'})",
+                    "path": f"/static/bitplanes/{out_filename}"
+                })
 
         return {"status": "Success", "planes": generated_files}
         
     except Exception as e:
         return {"status": "Error", "error": str(e)}
+
