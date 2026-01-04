@@ -227,7 +227,25 @@ const ResultsView = ({ results }) => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {Object.entries(tool_reports).map(([toolId, toolResult]) => {
-                                    if (toolId === 'bit_planes') return null;
+                                    const hiddenTools = [
+                                        'bit_planes', // Always handled separately
+                                        'exif',
+                                        'steghide',
+                                        'outguess',
+                                        'f5',
+                                        'stegsolve',
+                                        'jpegdump',
+                                        'stegdetect',
+                                        'stegoveritas',
+                                        'foremost',
+                                        'aperisolve',
+                                        'lsb_tools',
+                                        'lsb_extract',
+                                        'stegano',
+                                        'camo'
+                                    ];
+
+                                    if (hiddenTools.includes(toolId)) return null;
                                     let color = "text-neon-blue";
                                     if (toolResult?.output?.length > 0 && toolId === 'zsteg') color = "text-neon-red";
                                     if (toolId === 'strings') color = "text-gray-300";
